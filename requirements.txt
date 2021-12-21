@@ -1,4 +1,4 @@
 opencv-python ~= 4.5
-numpy ~= 1.21
+numpy == 1.19.4
 playsound == 1.2.2
 pyobjc ~= 8.1; sys_platform == 'darwin'
