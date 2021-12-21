@@ -24,10 +24,12 @@ class TerminatorVision:
     Throws exceptions if errors occur.
     """
 
-    def __init__(self, feed: int = 0):
+    def __init__(self, feed: int, shape: tuple):
         """ Construct Terminator visual input feed. """
+        self.feed: int = feed
+        self.shape = tuple(int(x) for x in shape)
+
         # Open camera.
-        self.feed = feed
         self.cam = cv2.VideoCapture(self.feed)
         if not self.cam.isOpened():
             raise Exception(f"Accessing camera #{self.feed} error.")
@@ -46,7 +48,7 @@ class TerminatorVision:
 
         # Start background thread to read camera asynchronously (better performance).
         self.stopping = False
-        Thread(target=self.__update, args=()).start()
+        Thread(target=self.__update, args=(), daemon = True).start()
 
     def __update(self):
         """
@@ -62,9 +64,29 @@ class TerminatorVision:
     def __capture(self):
         """ Capture and process a frame from visual input feed. """
         (camRet, camFrame) = self.cam.read()
-        redChannel = camFrame[:, :, 2]  # Get the red channel.
-        (self.ret, self.frame) = (camRet, cv2.merge(
-            [self.ZEROS, self.ZEROS, redChannel]))
+        if camRet:
+            camFrame = cv2.merge([self.ZEROS, self.ZEROS, camFrame[:, :, 2]])
+            if camFrame.shape[:2] != self.shape[:2]:
+                camFrame = self.__resize(camFrame)
+            
+        (self.ret, self.frame) = (camRet, camFrame)
+
+    def __resize(self, image):
+        """ Resize (and letterbox) the image to the required dimensions. """
+        (reqH, reqW) = self.shape[:2]
+        (imgH, imgW) = image.shape[:2]
+
+        ratio = reqW / float(imgW)
+        dim = (reqW, int(imgH * ratio))
+
+        # Resize the image
+        resized = cv2.resize(image, dim)
+        (imgH, imgW) = resized.shape[:2]
+
+        # Letterbox the image
+        y = (imgH - reqH) / 2
+
+        return resized[int(y):int(y+reqH), 0:reqW]
 
     def read(self):
         """
@@ -114,7 +136,7 @@ class HeadsUpDisplay:
 
         Returns: A frame of analysis to match the current time.
         """
-        if self.baseNanos == None:
+        if self.baseNanos is None:
             playsound(self.sound, block=False)
             # Base for working out relative time in milliseconds.
             self.baseNanos = time.time_ns()
@@ -168,6 +190,10 @@ class HeadsUpDisplay:
     def get_time(self):
         """ Return relative time in ms since start of HUD feed. """
         return self.timeMillis
+
+    def get_shape(self):
+        """ Return shape (width, height) of HUD frames. """
+        return (int(self.hud.get(cv2.CAP_PROP_FRAME_HEIGHT)), int(self.hud.get(cv2.CAP_PROP_FRAME_WIDTH)))
 
     def release(self):
         """ Release the HUD analysis feed as part of a shutdown process. """
