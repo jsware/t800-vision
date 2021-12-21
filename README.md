@@ -34,3 +34,8 @@ or
 ```
 
 Press [ESC] to terminate the program.
+
+## Credits
+
+* Terminator 1 Overlay and Sounds: [Marsala Geek](https://www.youtube.com/watch?v=sR9sNApnmH8)
+* Terminator 2 Overlay and Sounds: [CyberLynx](https://www.youtube.com/watch?v=uCrIr74xmdE)
