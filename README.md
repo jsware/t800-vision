@@ -35,6 +35,8 @@ or
 
 Press [ESC] to terminate the program.
 
+[![Watching the News](https://img.youtube.com/vi/enEl4zbtvnU/0.jpg)](https://www.youtube.com/watch?v=enEl4zbtvnU)
+
 ## Credits
 
 Credits to the following owners of original videos. NB: Re-use only within their terms.
